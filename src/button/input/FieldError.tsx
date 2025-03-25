@@ -1,14 +1,15 @@
 interface FieldErrorProps {
     error: any | null;
+    style?: string
 }
 
 export const FieldError: React.FC<FieldErrorProps> = ({
-    error
+    error, style
 }) => {
 
     if(error){
         return (
-            <span className="text-red-500 text-sm">{error}</span>
+            <span className={`${style} text-sm`}>{error}</span>
         )
     }
 
