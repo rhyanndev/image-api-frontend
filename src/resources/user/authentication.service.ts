@@ -1,4 +1,5 @@
 import { AccessToken, Credentials, User, UserSessionToken } from './users.resources'
+import jwt from 'jwt-decode'
 
 class AuthService {
     baseURL: string = 'http://localhost:8080/v1/users';
@@ -37,6 +38,62 @@ class AuthService {
         }
 
     }
+
+    initSession(token: AccessToken){
+        if(token.accessToken){
+            const decodedToken: any = jwt(token.accessToken);
+
+            // console.log("DECODED TOKEN: ", decodedToken);
+
+            const userSessionToken: UserSessionToken = {
+                accessToken: token.accessToken,
+                email: decodedToken.sub,
+                name: decodedToken.name,
+                expiration: decodedToken.exp
+            }
+
+            this.setUserSession(userSessionToken);
+
+        }
+    }
+
+    // saving the user in the session
+
+    setUserSession(userSessionToken: UserSessionToken){
+        localStorage.setItem(AuthService.AUTH_PARAM, JSON.stringify(userSessionToken));
+    }
+
+    getUserSession() : UserSessionToken | null {
+        const authString = localStorage.getItem(AuthService.AUTH_PARAM);
+        if(!authString){
+            return null;
+        }
+
+        const token: UserSessionToken = JSON.parse(authString);
+        return token;
+
+    }
+
+    isSessionValid() : boolean {
+        const userSession: UserSessionToken | null = this.getUserSession();
+        if(!userSession){
+            return false;
+        }
+
+        const expiration: number | undefined = userSession.expiration;
+
+        if(expiration){
+            const expirationDateInMillis = expiration * 1000;
+
+            return new Date() < new Date(expirationDateInMillis)                                                                                                                            
+            // console.log("Data expiração:", new Date(expirationDateInMillis))
+
+        }
+
+        return false;
+
+    }
+
 }
 
 export const useAuth = () => new AuthService();
