@@ -17,7 +17,7 @@ export default function GaleryPage(){
     
     async function searchImages(){
         setLoading(true)
-        const result = await useService.search(query, "");
+        const result = await useService.search(query, extension);
         setImages(result);
         setLoading(false)
 
