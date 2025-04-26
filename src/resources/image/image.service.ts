@@ -30,6 +30,35 @@ class ImageService {
 
         return response.headers.get('location') ?? ''
     }
+
+    async deleteImages(ids: string[]): Promise<void> {
+        const userSession = this.auth.getUserSession();
+        
+        // Extrair apenas os IDs das URLs
+        const imageIds = ids.map(url => {
+            // Pega a última parte da URL (o UUID)
+            const parts = url.split('/');
+            return parts[parts.length - 1];
+        });
+
+        console.log("IDs extraídos para deleção:", imageIds);
+
+        const response = await fetch(`${this.baseURL}`, {
+            method: 'DELETE',
+            body: JSON.stringify(imageIds), // Envia a lista de IDs das imagens para deletar
+            headers: {
+                'Content-Type': "application/json",
+                "Authorization": `Bearer ${userSession?.accessToken}`,
+            }
+        });
+
+        if (!response.ok) {
+            console.error("Status da resposta:", response.status);
+            const errorText = await response.text();
+            console.error("Corpo da resposta:", errorText);
+            throw new Error(`Erro ao deletar as imagens: ${response.status} ${errorText}`);
+        }
+    }
 }
 
 // using react hook -: useFunctionName
